@@ -1,0 +1,18 @@
+.box {
+    display: flex;
+    gap: var(--lumo-space-m);
+}
+
+.box.vertical {
+    flex-direction: column;
+    width: 100%;
+}
+
+.box.horizontal {
+    flex-direction: row;
+    align-items: center;
+}
+
+.spacer {
+    flex-grow: 1;
+}
