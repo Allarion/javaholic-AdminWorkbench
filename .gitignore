@@ -1,0 +1,22 @@
+# ===== Maven =====
+target/
+
+# ===== IntelliJ =====
+.idea/
+*.iml
+
+# ===== Logs =====
+*.log
+
+# ===== Vaadin frontend build output =====
+# Generated Flow imports and web component glue code
+src/main/frontend/generated/
+
+# Node build stuff (if Vaadin runs in production mode)
+node_modules/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Optional: if you ever switch to Vite build cache
+vite.config.ts.timestamp*
