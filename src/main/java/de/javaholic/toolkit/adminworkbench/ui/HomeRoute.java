@@ -8,22 +8,29 @@ import com.vaadin.flow.router.Route;
 import de.javaholic.toolkit.iam.core.spi.PermissionStore;
 import de.javaholic.toolkit.iam.core.spi.RoleStore;
 import de.javaholic.toolkit.iam.core.spi.UserStore;
-import de.javaholic.toolkit.iam.ui.IamPanels;
-import de.javaholic.toolkit.iam.ui.adapter.PermissionCrudStoreAdapter;
-import de.javaholic.toolkit.iam.ui.adapter.RoleCrudStoreAdapter;
-import de.javaholic.toolkit.iam.ui.adapter.UserCrudStoreAdapter;
+import de.javaholic.toolkit.iam.ui.IAMCrudPanels;
+import de.javaholic.toolkit.iam.ui.dto.PermissionDto;
+import de.javaholic.toolkit.iam.ui.dto.RoleDto;
+import de.javaholic.toolkit.iam.ui.dto.UserDto;
+import de.javaholic.toolkit.persistence.core.CrudStore;
+
+import java.util.UUID;
+
 
 @Route("") // Startseite
 public class HomeRoute extends VerticalLayout {
 
-    private final UserCrudStoreAdapter userStore;
-    private final RoleCrudStoreAdapter roleStore;
-    private final PermissionCrudStoreAdapter permissionStore;
 
-    public HomeRoute(UserStore userStore, RoleStore roleStore, PermissionStore permStore) {
-        this.userStore = new UserCrudStoreAdapter(userStore);
-        this.roleStore = new RoleCrudStoreAdapter(roleStore);
-        this.permissionStore = new PermissionCrudStoreAdapter(permStore);
+    private final CrudStore<UserDto, UUID> userStore;
+    private final CrudStore<RoleDto, UUID> roleStore;
+    private final CrudStore<PermissionDto, UUID> permissionStore;
+
+    public HomeRoute(CrudStore<UserDto, UUID> userStore, CrudStore<RoleDto, UUID> roleStore, CrudStore<PermissionDto, UUID> permissionStore) {
+        this.userStore = userStore;
+        this.roleStore = roleStore;
+        this.permissionStore = permissionStore;
+
+
         setSizeFull();
         initContent();
     }
@@ -42,13 +49,13 @@ public class HomeRoute extends VerticalLayout {
         tabs.addSelectedChangeListener(e -> {
             content.removeAll();
             switch (tabs.getSelectedIndex()) {
-                case 0 -> content.add(IamPanels.users(userStore, roleStore));
-                case 1 -> content.add(IamPanels.roles(roleStore, permissionStore));
-                case 2 -> content.add(IamPanels.permissions(permissionStore));
+                case 0 -> content.add(IAMCrudPanels.users(userStore));
+                case 1 -> content.add(IAMCrudPanels.roles(roleStore, permissionStore));
+                case 2 -> content.add(IAMCrudPanels.permissions(permissionStore));
             }
         });
 
         tabs.setSelectedIndex(0); // initial
-        content.add(IamPanels.users(userStore, roleStore));
+        content.add(IAMCrudPanels.users(userStore));
     }
 }

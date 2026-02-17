@@ -131,6 +131,12 @@
             <artifactId>iam-persistence-jpa</artifactId>
             <version>${toolkit.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>de.javaholic</groupId>
+            <artifactId>iam-application-spring</artifactId>
+            <version>${toolkit.version}</version>
+        </dependency>
         <!-- IAM kommt später bewusst dazu -->
         <!--
         <dependency>
