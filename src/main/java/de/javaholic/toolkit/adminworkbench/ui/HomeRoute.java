@@ -5,57 +5,64 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.Route;
-import de.javaholic.toolkit.iam.core.spi.PermissionStore;
-import de.javaholic.toolkit.iam.core.spi.RoleStore;
-import de.javaholic.toolkit.iam.core.spi.UserStore;
+import de.javaholic.toolkit.i18n.TextResolver;
+import de.javaholic.toolkit.i18n.dto.spi.I18nEntryDtoStore;
+import de.javaholic.toolkit.i18n.ui.I18nCrudPanels;
+import de.javaholic.toolkit.iam.dto.spi.PermissionDtoStore;
+import de.javaholic.toolkit.iam.dto.spi.RoleDtoStore;
+import de.javaholic.toolkit.iam.dto.spi.UserDtoStore;
 import de.javaholic.toolkit.iam.ui.IAMCrudPanels;
-import de.javaholic.toolkit.iam.ui.dto.PermissionDto;
-import de.javaholic.toolkit.iam.ui.dto.RoleDto;
-import de.javaholic.toolkit.iam.ui.dto.UserDto;
 import de.javaholic.toolkit.persistence.core.CrudStore;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
-import java.util.UUID;
+import java.util.Arrays;
 
-
-@Route("") // Startseite
+@Route("")
 public class HomeRoute extends VerticalLayout {
 
+    @Autowired
+    ApplicationContext ctx;
 
-    private final CrudStore<UserDto, UUID> userStore;
-    private final CrudStore<RoleDto, UUID> roleStore;
-    private final CrudStore<PermissionDto, UUID> permissionStore;
-
-    public HomeRoute(CrudStore<UserDto, UUID> userStore, CrudStore<RoleDto, UUID> roleStore, CrudStore<PermissionDto, UUID> permissionStore) {
-        this.userStore = userStore;
-        this.roleStore = roleStore;
-        this.permissionStore = permissionStore;
-
-
-        setSizeFull();
-        initContent();
+    @PostConstruct
+    public void debug() {
+        System.out.println(Arrays.toString(ctx.getBeanNamesForType(CrudStore.class)));
     }
 
-    private void initContent() {
+    public HomeRoute(
+            UserDtoStore userStore,
+            RoleDtoStore roleStore,
+            PermissionDtoStore permissionStore,
+            I18nEntryDtoStore i18nStore,
+            TextResolver textResolver
+    ) {
+        setSizeFull();
+
         var tabs = new Tabs(
-                new Tab("Users"), //
-                new Tab("Roles"), //
-                new Tab("Permissions"));
+                new Tab("IAM"),
+                new Tab("I18N")
+        );
 
         var content = new Div();
         content.setSizeFull();
+
         add(tabs, content);
         expand(content);
 
         tabs.addSelectedChangeListener(e -> {
             content.removeAll();
             switch (tabs.getSelectedIndex()) {
-                case 0 -> content.add(IAMCrudPanels.users(userStore));
-                case 1 -> content.add(IAMCrudPanels.roles(roleStore, permissionStore));
-                case 2 -> content.add(IAMCrudPanels.permissions(permissionStore));
+                case 0 -> content.add(
+                        IAMCrudPanels.createView(userStore, roleStore, permissionStore, textResolver)
+                );
+                case 1 -> content.add(
+                        I18nCrudPanels.createView(i18nStore, textResolver)
+                );
             }
         });
 
-        tabs.setSelectedIndex(0); // initial
-        content.add(IAMCrudPanels.users(userStore));
+        tabs.setSelectedIndex(0);
+        content.add(IAMCrudPanels.createView(userStore, roleStore, permissionStore, textResolver));
     }
 }
