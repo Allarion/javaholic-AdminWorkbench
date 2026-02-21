@@ -6,7 +6,6 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -14,16 +13,18 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
 import de.javaholic.toolkit.ui.Buttons;
 import de.javaholic.toolkit.ui.Dialogs;
 import de.javaholic.toolkit.ui.Inputs;
 import de.javaholic.toolkit.ui.action.Action;
 import de.javaholic.toolkit.ui.action.Actions;
+import de.javaholic.toolkit.ui.annotations.UIRequired;
 import de.javaholic.toolkit.ui.form.Forms;
 import de.javaholic.toolkit.ui.form.state.FormState;
 import de.javaholic.toolkit.ui.layout.Layouts;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -70,26 +71,11 @@ public class UITestPage extends VerticalLayout {
         demo.getStyle().set("border", "1px solid var(--lumo-contrast-20pct)");
         demo.getStyle().set("padding", "var(--lumo-space-m)");
 
-        Binder<FormModel> binder = new Binder<>(FormModel.class);
-        FormModel model = new FormModel();
-        binder.setBean(model);
+        Forms.Form<DemoModel> form = Forms.of(DemoModel.class).build();
+        DemoModel model = new DemoModel();
+        form.binder().setBean(model);
 
-        FormState state = Forms.state(binder);
-
-        TextField name = Inputs.textField().label("Name").widthFull().build();
-        name.setWidth("24rem");
-        binder.forField(name)
-                .asRequired("Name required")
-                .bind(FormModel::getName, FormModel::setName);
-
-        Span validationMessage = new Span();
-        validationMessage.getStyle().set("color", "var(--lumo-error-text-color)");
-        validationMessage.setVisible(false);
-        binder.addStatusChangeListener(event -> {
-            String message = binder.isValid() ? "" : "Name required";
-            validationMessage.setText(message);
-            validationMessage.setVisible(!message.isBlank());
-        });
+        FormState state = Forms.state(form.binder());
 
         Checkbox busy = Inputs.checkbox().label("Busy").build();
         Checkbox admin = Inputs.checkbox().label("Admin").build();
@@ -98,9 +84,9 @@ public class UITestPage extends VerticalLayout {
 
         Action saveAction = Actions.create()
                 .label("Save")
-                .tooltip("Saves current form")
+                .tooltip("Domain validation + UIRequired gate submit")
                 .enabledBy(state.canSubmit())
-                .onClick(() -> Notification.show("Saved: " + model.getName()))
+                .onClick(() -> Notification.show("Saved: " + model.getName() + ", age=" + model.getAge()))
                 .build();
 
         Action deleteAction = Actions.create()
@@ -111,7 +97,7 @@ public class UITestPage extends VerticalLayout {
                 .onClick(() -> Notification.show("Delete clicked"))
                 .build();
 
-        demo.add(name, validationMessage, admin, busy);
+        demo.add(form.layout(), admin, busy);
         demo.add(Layouts.toolbar().action(saveAction).spacer().action(deleteAction).build());
         demo.add(Layouts.menu().item(saveAction).separator().item(deleteAction).build());
         return demo;
@@ -144,14 +130,9 @@ public class UITestPage extends VerticalLayout {
         VerticalLayout box = Layouts.vbox();
         box.add(new H3("Forms + Buttons Combination"));
 
-        Forms.Form<FormModel> form = Forms.of(FormModel.class)
-                .field("name", field -> {
-                    field.component(Inputs.textField().label("Name").widthFull().build());
-                    field.validate(String.class, binding -> binding.asRequired("Name required"));
-                })
-                .build();
+        Forms.Form<DemoModel> form = Forms.of(DemoModel.class).build();
 
-        FormModel model = new FormModel();
+        DemoModel model = new DemoModel();
         form.binder().setBean(model);
         FormState state = Forms.state(form.binder());
 
@@ -182,17 +163,12 @@ public class UITestPage extends VerticalLayout {
         Button formDialog = Buttons.create()
                 .label("Open Form Dialog")
                 .action(() -> {
-                    Forms.Form<FormModel> dialogForm = Forms.of(FormModel.class)
-                            .field("name", field -> {
-                                field.component(Inputs.textField().label("Name").widthFull().build());
-                                field.validate(String.class, binding -> binding.asRequired("Name required"));
-                            })
-                            .build();
-                    dialogForm.binder().setBean(new FormModel());
+                    Forms.Form<DemoModel> dialogForm = Forms.of(DemoModel.class).build();
+                    dialogForm.binder().setBean(new DemoModel());
 
                     Dialogs.form(dialogForm)
                             .header("Edit")
-                            .description("Form dialog integration test")
+                            .description("Domain validation in dialog")
                             .confirmLabel("Save")
                             .cancelLabel("Cancel")
                             .onOk(f -> Notification.show("Dialog form saved"))
@@ -219,8 +195,13 @@ public class UITestPage extends VerticalLayout {
         return box;
     }
 
-    public static class FormModel {
+    public static class DemoModel {
+        @NotBlank
         private String name;
+
+        @UIRequired
+        @Min(1)
+        private Integer age;
 
         public String getName() {
             return name;
@@ -228,6 +209,14 @@ public class UITestPage extends VerticalLayout {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public Integer getAge() {
+            return age;
+        }
+
+        public void setAge(Integer age) {
+            this.age = age;
         }
     }
 }
