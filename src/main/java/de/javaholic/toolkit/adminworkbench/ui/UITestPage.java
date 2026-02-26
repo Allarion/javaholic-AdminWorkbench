@@ -17,6 +17,7 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
+import de.javaholic.toolkit.iam.core.api.PermissionChecker;
 import de.javaholic.toolkit.introspection.BeanProperty;
 import de.javaholic.toolkit.introspection.BeanPropertyTypes;
 import de.javaholic.toolkit.persistence.core.CrudStore;
@@ -205,19 +206,24 @@ public class UITestPage extends VerticalLayout {
                 "Expected: BeanValidation, UiHidden, UiOrder, UiReadOnly, UiPermission, and UIRequired are reflected in runtime UI + debug."
         );
 
-        Forms.Form<AutoMappingContractSpec> form = Forms.auto(AutoMappingContractSpec.class).withTextResolver(this::resolveText).build();
-        AutoMappingContractSpec bean = new AutoMappingContractSpec();
-        form.binder().setBean(bean);
-
         Checkbox hasPermission = Inputs.checkbox().label("auto-mapping.has-permission").build();
         hasPermission.setValue(false);
+        PermissionChecker checker = permission -> Boolean.TRUE.equals(hasPermission.getValue());
+
+        Forms.Form<AutoMappingContractSpec> form = Forms.auto(AutoMappingContractSpec.class)
+                .withTextResolver(this::resolveText)
+                .withPermissionChecker(checker)
+                .build();
+        AutoMappingContractSpec bean = new AutoMappingContractSpec();
+        form.binder().setBean(bean);
 
         Span status = createStatusLabel();
         TextArea debug = createDebugPanel("Auto Mapping Debug");
         UiMeta<AutoMappingContractSpec> meta = UiInspector.inspect(AutoMappingContractSpec.class);
 
         Runnable refresh = () -> {
-            applyPermissionVisibility(form, meta, Boolean.TRUE.equals(hasPermission.getValue()));
+            // Re-triggers policy evaluation when simulated permission changes.
+            form.binder().setBean(form.binder().getBean());
             refreshAutoMappingStatus(status, form, bean);
             refreshAutoMappingDebug(debug, form, meta);
         };
@@ -591,13 +597,6 @@ public class UITestPage extends VerticalLayout {
                 "rows=" + grid.getDataProvider().size(new com.vaadin.flow.data.provider.Query<>()),
                 "selected=" + Optional.ofNullable(selectedState.get()).map(IntegrationSpec::getCode).orElse("-"),
                 "hasSelection(state)=" + hasSelection.get()));
-    }
-
-    private <T> void applyPermissionVisibility(Forms.Form<T> form, UiMeta<T> meta, boolean hasPermission) {
-        meta.properties().forEach(property -> form.field(property.name()).ifPresent(component -> {
-            boolean visible = property.permissionKey().isEmpty() || hasPermission;
-            component.setVisible(visible);
-        }));
     }
 
     private <T> void attachFieldListeners(Forms.Form<T> form, Class<T> type, Runnable onChange) {
