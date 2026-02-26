@@ -104,7 +104,7 @@
 
         <dependency>
             <groupId>de.javaholic</groupId>
-            <artifactId>i18n-crud-ui</artifactId>
+            <artifactId>i18n-resource-ui</artifactId>
             <version>${toolkit.version}</version>
         </dependency>
         <dependency>
@@ -121,7 +121,7 @@
 
         <dependency>
             <groupId>de.javaholic</groupId>
-            <artifactId>iam-crud-ui</artifactId>
+            <artifactId>iam-resource-ui</artifactId>
             <version>${toolkit.version}</version>
         </dependency>
         <dependency>
