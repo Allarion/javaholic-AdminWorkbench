@@ -348,10 +348,24 @@ public class UITestPage extends VerticalLayout {
         TextArea debug = createDebugPanel("Action System Debug");
         Checkbox enableStandalone = Inputs.checkbox().label("action.enable-standalone").build();
         Checkbox showStandalone = Inputs.checkbox().label("action.show-standalone").build();
+        Checkbox hasActionPermission = Inputs.checkbox().label("action.has-admin-permission").build();
 
         Button standalone = Buttons.action(Actions.create().label("Standalone Action")
                 .enabledWhen(enableStandalone).visibleWhen(showStandalone)
                 .onClick(() -> setStatus(status, "standalone-action", "clicked")).build());
+
+        PermissionChecker checker = permission -> Boolean.TRUE.equals(hasActionPermission.getValue());
+        var protectedAction = Actions.create()
+                .label("Permission Action")
+                .permission("perm.admin.edit")
+                .onClick(() -> setStatus(status, "permission-action", "clicked"))
+                .build();
+        HorizontalLayout protectedActionHost = new HorizontalLayout();
+        Runnable rebuildProtectedAction = () -> {
+            protectedActionHost.removeAll();
+            protectedActionHost.add(Buttons.action(protectedAction, checker));
+        };
+        rebuildProtectedAction.run();
 
         Grid<ActionMatrixRow> grid = Grids.of(ActionMatrixRow.class)
                 .items(List.of(new ActionMatrixRow("A", true), new ActionMatrixRow("B", false)))
@@ -364,26 +378,30 @@ public class UITestPage extends VerticalLayout {
                 .preset(CrudPresets.none())
                 .toolbarAction(CrudAction.toolbar("Toolbar Action", () -> {
                     setStatus(status, "toolbar-action", "invoked");
-                    refreshActionDebug(debug, standalone, grid);
+                    refreshActionDebug(debug, standalone, protectedActionHost, grid);
                 }))
                 .rowAction(CrudAction.<ActionMatrixRow>row("Row Action", row -> {
                     setStatus(status, "row-action", "row=" + row.getName());
-                    refreshActionDebug(debug, standalone, grid);
+                    refreshActionDebug(debug, standalone, protectedActionHost, grid);
                 }).enabledWhen(ActionMatrixRow::isEnabled))
                 .selectionAction(CrudAction.<ActionMatrixRow>selection("Selection Action", selection -> {
                     setStatus(status, "selection-action", "selected=" + selection.size());
-                    refreshActionDebug(debug, standalone, grid);
+                    refreshActionDebug(debug, standalone, protectedActionHost, grid);
                 }))
                 .build();
 
-        Runnable refresh = () -> refreshActionDebug(debug, standalone, grid);
+        Runnable refresh = () -> refreshActionDebug(debug, standalone, protectedActionHost, grid);
         enableStandalone.addValueChangeListener(e -> refresh.run());
         showStandalone.addValueChangeListener(e -> refresh.run());
+        hasActionPermission.addValueChangeListener(e -> {
+            rebuildProtectedAction.run();
+            refresh.run();
+        });
         grid.addSelectionListener(e -> refresh.run());
         refresh.run();
         setStatus(status, "action-ready", "toggle standalone states and invoke toolbar/row/selection actions");
 
-        section.add(enableStandalone, showStandalone, standalone, panel, debug, status);
+        section.add(enableStandalone, showStandalone, hasActionPermission, standalone, protectedActionHost, panel, debug, status);
         return section;
     }
 
@@ -573,10 +591,17 @@ public class UITestPage extends VerticalLayout {
                 "bean=" + beanSnapshot(BinderContractSpec.class, form.binder().getBean())));
     }
 
-    private void refreshActionDebug(TextArea debug, Button standalone, Grid<ActionMatrixRow> grid) {
+    private void refreshActionDebug(TextArea debug, Button standalone, HorizontalLayout protectedActionHost, Grid<ActionMatrixRow> grid) {
+        boolean permissionActionEnabled = protectedActionHost.getChildren()
+                .filter(Button.class::isInstance)
+                .map(Button.class::cast)
+                .findFirst()
+                .map(Button::isEnabled)
+                .orElse(false);
         debug.setValue(String.join("\n",
                 "standalone.visible=" + standalone.isVisible(),
                 "standalone.enabled=" + standalone.isEnabled(),
+                "permissionAction.enabled=" + permissionActionEnabled,
                 "selectedRows=" + grid.getSelectedItems().size(),
                 "grid.items=" + grid.getDataProvider().size(new com.vaadin.flow.data.provider.Query<>())));
     }
