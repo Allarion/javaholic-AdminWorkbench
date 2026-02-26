@@ -384,7 +384,7 @@ public class UITestPage extends VerticalLayout {
                     setStatus(status, "row-action", "row=" + row.getName());
                     refreshActionDebug(debug, standalone, protectedActionHost, grid);
                 }).enabledWhen(ActionMatrixRow::isEnabled))
-                .selectionAction(ResourceAction.<ActionMatrixRow>selection("Selection Action", selection -> {
+                .selectionAction(ResourceAction.selection("Selection Action", selection -> {
                     setStatus(status, "selection-action", "selected=" + selection.size());
                     refreshActionDebug(debug, standalone, protectedActionHost, grid);
                 }))
