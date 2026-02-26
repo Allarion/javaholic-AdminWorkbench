@@ -7,11 +7,11 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.Route;
 import de.javaholic.toolkit.i18n.TextResolver;
 import de.javaholic.toolkit.i18n.dto.spi.I18nEntryDtoStore;
-import de.javaholic.toolkit.i18n.ui.I18nCrudPanels;
+import de.javaholic.toolkit.i18n.ui.I18nResourcePanels;
 import de.javaholic.toolkit.iam.dto.spi.PermissionFormDtoStore;
 import de.javaholic.toolkit.iam.dto.spi.RoleDtoStore;
 import de.javaholic.toolkit.iam.dto.spi.UserFormDtoStore;
-import de.javaholic.toolkit.iam.ui.IAMCrudPanels;
+import de.javaholic.toolkit.iam.ui.IAMResourcePanels;
 import de.javaholic.toolkit.persistence.core.CrudStore;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,15 +54,16 @@ public class HomeRoute extends VerticalLayout {
             content.removeAll();
             switch (tabs.getSelectedIndex()) {
                 case 0 -> content.add(
-                        IAMCrudPanels.createView(userStore, roleStore, permissionStore, textResolver)
+                        IAMResourcePanels.createView(userStore, roleStore, permissionStore, textResolver)
                 );
                 case 1 -> content.add(
-                        I18nCrudPanels.createView(i18nStore, textResolver)
+                        I18nResourcePanels.createView(i18nStore, textResolver)
                 );
             }
         });
 
         tabs.setSelectedIndex(0);
-        content.add(IAMCrudPanels.createView(userStore, roleStore, permissionStore, textResolver));
+        content.add(IAMResourcePanels.createView(userStore, roleStore, permissionStore, textResolver));
     }
 }
+

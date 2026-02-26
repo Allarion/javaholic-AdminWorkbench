@@ -32,10 +32,10 @@ import de.javaholic.toolkit.ui.annotations.UiLabel;
 import de.javaholic.toolkit.ui.annotations.UiOrder;
 import de.javaholic.toolkit.ui.annotations.UiPermission;
 import de.javaholic.toolkit.ui.annotations.UiReadOnly;
-import de.javaholic.toolkit.ui.crud.CrudPanel;
-import de.javaholic.toolkit.ui.crud.CrudPanels;
-import de.javaholic.toolkit.ui.crud.action.CrudAction;
-import de.javaholic.toolkit.ui.crud.action.CrudPresets;
+import de.javaholic.toolkit.ui.resource.ResourcePanel;
+import de.javaholic.toolkit.ui.resource.ResourcePanels;
+import de.javaholic.toolkit.ui.resource.action.ResourceAction;
+import de.javaholic.toolkit.ui.resource.action.ResourcePresets;
 import de.javaholic.toolkit.ui.form.Forms;
 import de.javaholic.toolkit.ui.form.fields.FieldContext;
 import de.javaholic.toolkit.ui.form.fields.FieldRegistry;
@@ -372,19 +372,19 @@ public class UITestPage extends VerticalLayout {
                 .column(ActionMatrixRow::getName).header("Name").and().build();
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
 
-        CrudPanel<ActionMatrixRow> panel = CrudPanels.of(ActionMatrixRow.class)
+        ResourcePanel<ActionMatrixRow> panel = ResourcePanels.of(ActionMatrixRow.class)
                 .withStore(new InMemoryCrudStore<>(new ArrayList<>(List.of(new ActionMatrixRow("A", true), new ActionMatrixRow("B", false)))))
                 .withGrid(grid)
-                .preset(CrudPresets.none())
-                .toolbarAction(CrudAction.toolbar("Toolbar Action", () -> {
+                .preset(ResourcePresets.none())
+                .toolbarAction(ResourceAction.toolbar("Toolbar Action", () -> {
                     setStatus(status, "toolbar-action", "invoked");
                     refreshActionDebug(debug, standalone, protectedActionHost, grid);
                 }))
-                .rowAction(CrudAction.<ActionMatrixRow>row("Row Action", row -> {
+                .rowAction(ResourceAction.<ActionMatrixRow>row("Row Action", row -> {
                     setStatus(status, "row-action", "row=" + row.getName());
                     refreshActionDebug(debug, standalone, protectedActionHost, grid);
                 }).enabledWhen(ActionMatrixRow::isEnabled))
-                .selectionAction(CrudAction.<ActionMatrixRow>selection("Selection Action", selection -> {
+                .selectionAction(ResourceAction.<ActionMatrixRow>selection("Selection Action", selection -> {
                     setStatus(status, "selection-action", "selected=" + selection.size());
                     refreshActionDebug(debug, standalone, protectedActionHost, grid);
                 }))
@@ -408,7 +408,7 @@ public class UITestPage extends VerticalLayout {
     private Component buildGridAndPresetSection() {
         VerticalLayout section = createSection(
                 "SECTION 7 - Grid & Preset Tests",
-                "Covers Grids.auto and CrudPanels.auto with readOnly/full presets.",
+                "Covers Grids.auto and ResourcePanels.auto with readOnly/full presets.",
                 "Expected: preset changes default actions while custom selection actions remain propagated."
         );
 
@@ -417,16 +417,16 @@ public class UITestPage extends VerticalLayout {
         InMemoryCrudStore<GridPresetSpec> readOnlyStore = new InMemoryCrudStore<>(new ArrayList<>(sampleGridPresetRows()));
         InMemoryCrudStore<GridPresetSpec> fullStore = new InMemoryCrudStore<>(new ArrayList<>(sampleGridPresetRows()));
 
-        CrudPanel<GridPresetSpec> readOnlyPanel = CrudPanels.auto(GridPresetSpec.class)
-                .withStore(readOnlyStore).withTextResolver(this::resolveText).preset(CrudPresets.readOnly())
-                .selectionAction(CrudAction.selection("ReadOnly Selection", selection -> setStatus(status, "readonly-selection", "selected=" + selection.size())))
-                .toolbarAction(CrudAction.toolbar("ReadOnly Toolbar", () -> setStatus(status, "readonly-toolbar", "toolbar invoked")))
+        ResourcePanel<GridPresetSpec> readOnlyPanel = ResourcePanels.auto(GridPresetSpec.class)
+                .withStore(readOnlyStore).withTextResolver(this::resolveText).preset(ResourcePresets.readOnly())
+                .selectionAction(ResourceAction.selection("ReadOnly Selection", selection -> setStatus(status, "readonly-selection", "selected=" + selection.size())))
+                .toolbarAction(ResourceAction.toolbar("ReadOnly Toolbar", () -> setStatus(status, "readonly-toolbar", "toolbar invoked")))
                 .build();
 
-        CrudPanel<GridPresetSpec> fullPanel = CrudPanels.auto(GridPresetSpec.class)
-                .withStore(fullStore).withTextResolver(this::resolveText).preset(CrudPresets.full())
-                .selectionAction(CrudAction.selection("Full Selection", selection -> setStatus(status, "full-selection", "selected=" + selection.size())))
-                .toolbarAction(CrudAction.toolbar("Full Toolbar", () -> setStatus(status, "full-toolbar", "toolbar invoked")))
+        ResourcePanel<GridPresetSpec> fullPanel = ResourcePanels.auto(GridPresetSpec.class)
+                .withStore(fullStore).withTextResolver(this::resolveText).preset(ResourcePresets.full())
+                .selectionAction(ResourceAction.selection("Full Selection", selection -> setStatus(status, "full-selection", "selected=" + selection.size())))
+                .toolbarAction(ResourceAction.toolbar("Full Toolbar", () -> setStatus(status, "full-toolbar", "toolbar invoked")))
                 .build();
 
         Button inspect = Buttons.create().label("Refresh Grid/Preset Debug")
@@ -606,7 +606,7 @@ public class UITestPage extends VerticalLayout {
                 "grid.items=" + grid.getDataProvider().size(new com.vaadin.flow.data.provider.Query<>())));
     }
 
-    private void refreshGridPresetDebug(TextArea debug, CrudPanel<GridPresetSpec> readOnlyPanel, CrudPanel<GridPresetSpec> fullPanel) {
+    private void refreshGridPresetDebug(TextArea debug, ResourcePanel<GridPresetSpec> readOnlyPanel, ResourcePanel<GridPresetSpec> fullPanel) {
         boolean readOnlyCreate = findButtonByText(readOnlyPanel, "Create").isPresent();
         boolean fullCreate = findButtonByText(fullPanel, "Create").isPresent();
         debug.setValue(String.join("\n",
@@ -954,3 +954,4 @@ public class UITestPage extends VerticalLayout {
         }
     }
 }
+
