@@ -8,9 +8,9 @@ import com.vaadin.flow.router.Route;
 import de.javaholic.toolkit.i18n.TextResolver;
 import de.javaholic.toolkit.i18n.dto.spi.I18nEntryDtoStore;
 import de.javaholic.toolkit.i18n.ui.I18nCrudPanels;
-import de.javaholic.toolkit.iam.dto.spi.PermissionDtoStore;
+import de.javaholic.toolkit.iam.dto.spi.PermissionFormDtoStore;
 import de.javaholic.toolkit.iam.dto.spi.RoleDtoStore;
-import de.javaholic.toolkit.iam.dto.spi.UserDtoStore;
+import de.javaholic.toolkit.iam.dto.spi.UserFormDtoStore;
 import de.javaholic.toolkit.iam.ui.IAMCrudPanels;
 import de.javaholic.toolkit.persistence.core.CrudStore;
 import jakarta.annotation.PostConstruct;
@@ -31,9 +31,9 @@ public class HomeRoute extends VerticalLayout {
     }
 
     public HomeRoute(
-            UserDtoStore userStore,
+            UserFormDtoStore userStore,
             RoleDtoStore roleStore,
-            PermissionDtoStore permissionStore,
+            PermissionFormDtoStore permissionStore,
             I18nEntryDtoStore i18nStore,
             TextResolver textResolver
     ) {
