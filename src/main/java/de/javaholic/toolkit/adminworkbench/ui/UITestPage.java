@@ -26,7 +26,7 @@ import de.javaholic.toolkit.ui.Dialogs;
 import de.javaholic.toolkit.ui.Grids;
 import de.javaholic.toolkit.ui.Inputs;
 import de.javaholic.toolkit.ui.crud.CrudPanel;
-import de.javaholic.toolkit.ui.crud.CrudPanels;
+import de.javaholic.toolkit.ui.crud.CrudPanels;öä
 import de.javaholic.toolkit.ui.crud.action.CrudAction;
 import de.javaholic.toolkit.ui.crud.action.CrudPresets;
 import de.javaholic.toolkit.ui.form.Forms;
