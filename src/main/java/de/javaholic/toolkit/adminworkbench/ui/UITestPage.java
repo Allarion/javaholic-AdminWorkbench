@@ -33,9 +33,8 @@ import de.javaholic.toolkit.ui.annotations.UiOrder;
 import de.javaholic.toolkit.ui.annotations.UiPermission;
 import de.javaholic.toolkit.ui.annotations.UiReadOnly;
 import de.javaholic.toolkit.ui.api.ResourceAction;
-import de.javaholic.toolkit.ui.resource.ResourcePanel;
+import de.javaholic.toolkit.ui.resource.GridFormsResourceView;
 import de.javaholic.toolkit.ui.resource.ResourcePanels;
-import de.javaholic.toolkit.ui.resource.action.ResourcePresets;
 import de.javaholic.toolkit.ui.form.Forms;
 import de.javaholic.toolkit.ui.form.fields.FieldContext;
 import de.javaholic.toolkit.ui.form.fields.FieldRegistry;
@@ -69,7 +68,8 @@ import java.util.stream.Collectors;
 
 @Route("ui-test")
 public class UITestPage extends VerticalLayout {
-
+    // TODO: add tests to help human.(checkmark, X icon)
+    // TODO: add tabs new area: Dto tests + actions via @UiSurface
     public UITestPage() {
         setSizeFull();
         setPadding(true);
@@ -372,10 +372,9 @@ public class UITestPage extends VerticalLayout {
                 .column(ActionMatrixRow::getName).header("Name").and().build();
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
 
-        ResourcePanel<ActionMatrixRow> panel = ResourcePanels.of(ActionMatrixRow.class)
+        GridFormsResourceView<ActionMatrixRow> panel = ResourcePanels.of(ActionMatrixRow.class)
                 .withStore(new InMemoryCrudStore<>(new ArrayList<>(List.of(new ActionMatrixRow("A", true), new ActionMatrixRow("B", false)))))
                 .withGrid(grid)
-                .preset(ResourcePresets.none())
                 // TODO: API WEIRD! toolbarAction(RessourceAction.toolbar...redundant af...
                 .toolbarAction(ResourceAction.toolbar("Toolbar Action", () -> {
                     setStatus(status, "toolbar-action", "invoked");
@@ -418,14 +417,14 @@ public class UITestPage extends VerticalLayout {
         InMemoryCrudStore<GridPresetSpec> readOnlyStore = new InMemoryCrudStore<>(new ArrayList<>(sampleGridPresetRows()));
         InMemoryCrudStore<GridPresetSpec> fullStore = new InMemoryCrudStore<>(new ArrayList<>(sampleGridPresetRows()));
 
-        ResourcePanel<GridPresetSpec> readOnlyPanel = ResourcePanels.auto(GridPresetSpec.class)
-                .withStore(readOnlyStore).withTextResolver(this::resolveText).preset(ResourcePresets.readOnly())
+        GridFormsResourceView<GridPresetSpec> readOnlyPanel = ResourcePanels.auto(GridPresetSpec.class)
+                .withStore(readOnlyStore).withTextResolver(this::resolveText)
                 .selectionAction(ResourceAction.selection("ReadOnly Selection", selection -> setStatus(status, "readonly-selection", "selected=" + selection.size())))
                 .toolbarAction(ResourceAction.toolbar("ReadOnly Toolbar", () -> setStatus(status, "readonly-toolbar", "toolbar invoked")))
                 .build();
 
-        ResourcePanel<GridPresetSpec> fullPanel = ResourcePanels.auto(GridPresetSpec.class)
-                .withStore(fullStore).withTextResolver(this::resolveText).preset(ResourcePresets.full())
+        GridFormsResourceView<GridPresetSpec> fullPanel = ResourcePanels.auto(GridPresetSpec.class)
+                .withStore(fullStore).withTextResolver(this::resolveText)
                 .selectionAction(ResourceAction.selection("Full Selection", selection -> setStatus(status, "full-selection", "selected=" + selection.size())))
                 .toolbarAction(ResourceAction.toolbar("Full Toolbar", () -> setStatus(status, "full-toolbar", "toolbar invoked")))
                 .build();
@@ -607,7 +606,7 @@ public class UITestPage extends VerticalLayout {
                 "grid.items=" + grid.getDataProvider().size(new com.vaadin.flow.data.provider.Query<>())));
     }
 
-    private void refreshGridPresetDebug(TextArea debug, ResourcePanel<GridPresetSpec> readOnlyPanel, ResourcePanel<GridPresetSpec> fullPanel) {
+    private void refreshGridPresetDebug(TextArea debug, GridFormsResourceView<GridPresetSpec> readOnlyPanel, GridFormsResourceView<GridPresetSpec> fullPanel) {
         boolean readOnlyCreate = findButtonByText(readOnlyPanel, "Create").isPresent();
         boolean fullCreate = findButtonByText(fullPanel, "Create").isPresent();
         debug.setValue(String.join("\n",
