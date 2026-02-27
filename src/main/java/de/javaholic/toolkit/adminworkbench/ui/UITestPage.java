@@ -32,9 +32,9 @@ import de.javaholic.toolkit.ui.annotations.UiLabel;
 import de.javaholic.toolkit.ui.annotations.UiOrder;
 import de.javaholic.toolkit.ui.annotations.UiPermission;
 import de.javaholic.toolkit.ui.annotations.UiReadOnly;
+import de.javaholic.toolkit.ui.api.ResourceAction;
 import de.javaholic.toolkit.ui.resource.ResourcePanel;
 import de.javaholic.toolkit.ui.resource.ResourcePanels;
-import de.javaholic.toolkit.ui.resource.action.ResourceAction;
 import de.javaholic.toolkit.ui.resource.action.ResourcePresets;
 import de.javaholic.toolkit.ui.form.Forms;
 import de.javaholic.toolkit.ui.form.fields.FieldContext;
@@ -376,7 +376,7 @@ public class UITestPage extends VerticalLayout {
                 .withStore(new InMemoryCrudStore<>(new ArrayList<>(List.of(new ActionMatrixRow("A", true), new ActionMatrixRow("B", false)))))
                 .withGrid(grid)
                 .preset(ResourcePresets.none())
-        // TODO: API WEIRD! toolbarAction(RessourceAction.toolbar...redundant af...
+                // TODO: API WEIRD! toolbarAction(RessourceAction.toolbar...redundant af...
                 .toolbarAction(ResourceAction.toolbar("Toolbar Action", () -> {
                     setStatus(status, "toolbar-action", "invoked");
                     refreshActionDebug(debug, standalone, protectedActionHost, grid);
