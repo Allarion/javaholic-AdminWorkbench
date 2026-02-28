@@ -102,7 +102,7 @@ public class UITestPage extends VerticalLayout {
                 "Covers Inputs.* and Buttons builders only.",
                 "Expected: builder DSL applies labels/placeholders/themes and button wiring without Forms.auto or Binder."
         );
-
+// TODO: add all
         TextField name = Inputs.textField().label("primitive.name.label").placeholder("primitive.name.placeholder")
                 .description("primitive.name.description").tooltip("primitive.name.tooltip")
                 .widthFull().withClassName("primitive-input").build();
@@ -350,9 +350,9 @@ public class UITestPage extends VerticalLayout {
         Checkbox showStandalone = Inputs.checkbox().label("action.show-standalone").build();
         Checkbox hasActionPermission = Inputs.checkbox().label("action.has-admin-permission").build();
 
-        Button standalone = Buttons.action(Actions.create().label("Standalone Action")
+        Button standalone = Buttons.from(Actions.create().label("Standalone Action")
                 .enabledWhen(enableStandalone).visibleWhen(showStandalone)
-                .onClick(() -> setStatus(status, "standalone-action", "clicked")).build());
+                .onClick(() -> setStatus(status, "standalone-action", "clicked"))).build();
 
         PermissionChecker checker = permission -> Boolean.TRUE.equals(hasActionPermission.getValue());
         var protectedAction = Actions.create()
@@ -363,7 +363,7 @@ public class UITestPage extends VerticalLayout {
         HorizontalLayout protectedActionHost = new HorizontalLayout();
         Runnable rebuildProtectedAction = () -> {
             protectedActionHost.removeAll();
-            protectedActionHost.add(Buttons.action(protectedAction, checker));
+            protectedActionHost.add(Buttons.from(protectedAction).withPermissionChecker(checker).build());
         };
         rebuildProtectedAction.run();
 
@@ -375,16 +375,15 @@ public class UITestPage extends VerticalLayout {
         GridFormsResourceView<ActionMatrixRow> panel = ResourcePanels.of(ActionMatrixRow.class)
                 .withStore(new InMemoryCrudStore<>(new ArrayList<>(List.of(new ActionMatrixRow("A", true), new ActionMatrixRow("B", false)))))
                 .withGrid(grid)
-                // TODO: API WEIRD! toolbarAction(RessourceAction.toolbar...redundant af...
-                .toolbarAction(ResourceAction.toolbar("Toolbar Action", () -> {
+                .action(ResourceAction.toolbar("Toolbar Action", () -> {
                     setStatus(status, "toolbar-action", "invoked");
                     refreshActionDebug(debug, standalone, protectedActionHost, grid);
                 }))
-                .rowAction(ResourceAction.<ActionMatrixRow>row("Row Action", row -> {
+                .action(ResourceAction.<ActionMatrixRow>row("Row Action", row -> {
                     setStatus(status, "row-action", "row=" + row.getName());
                     refreshActionDebug(debug, standalone, protectedActionHost, grid);
                 }).enabledWhen(ActionMatrixRow::isEnabled))
-                .selectionAction(ResourceAction.selection("Selection Action", selection -> {
+                .action(ResourceAction.selection("Selection Action", selection -> {
                     setStatus(status, "selection-action", "selected=" + selection.size());
                     refreshActionDebug(debug, standalone, protectedActionHost, grid);
                 }))
@@ -419,14 +418,14 @@ public class UITestPage extends VerticalLayout {
 
         GridFormsResourceView<GridPresetSpec> readOnlyPanel = ResourcePanels.auto(GridPresetSpec.class)
                 .withStore(readOnlyStore).withTextResolver(this::resolveText)
-                .selectionAction(ResourceAction.selection("ReadOnly Selection", selection -> setStatus(status, "readonly-selection", "selected=" + selection.size())))
-                .toolbarAction(ResourceAction.toolbar("ReadOnly Toolbar", () -> setStatus(status, "readonly-toolbar", "toolbar invoked")))
+                .action(ResourceAction.selection("ReadOnly Selection", selection -> setStatus(status, "readonly-selection", "selected=" + selection.size())))
+                .action(ResourceAction.toolbar("ReadOnly Toolbar", () -> setStatus(status, "readonly-toolbar", "toolbar invoked")))
                 .build();
 
         GridFormsResourceView<GridPresetSpec> fullPanel = ResourcePanels.auto(GridPresetSpec.class)
                 .withStore(fullStore).withTextResolver(this::resolveText)
-                .selectionAction(ResourceAction.selection("Full Selection", selection -> setStatus(status, "full-selection", "selected=" + selection.size())))
-                .toolbarAction(ResourceAction.toolbar("Full Toolbar", () -> setStatus(status, "full-toolbar", "toolbar invoked")))
+                .action(ResourceAction.selection("Full Selection", selection -> setStatus(status, "full-selection", "selected=" + selection.size())))
+                .action(ResourceAction.toolbar("Full Toolbar", () -> setStatus(status, "full-toolbar", "toolbar invoked")))
                 .build();
 
         Button inspect = Buttons.create().label("Refresh Grid/Preset Debug")
@@ -463,7 +462,7 @@ public class UITestPage extends VerticalLayout {
             refreshIntegrationDebug(debug, grid, selectedState, hasSelection);
         });
 
-        Button edit = Buttons.action(Actions.create().label("Edit Selected").enabledBy(hasSelection).onClick(() -> {
+        Button edit = Buttons.from(Actions.create().label("Edit Selected").enabledBy(hasSelection).onClick(() -> {
             IntegrationSpec selected = selectedState.get();
             if (selected == null) {
                 return;
@@ -482,9 +481,9 @@ public class UITestPage extends VerticalLayout {
                     })
                     .onCancel(() -> setStatus(status, "integration-cancel", "dialog canceled"))
                     .open();
-        }).build());
+        })).build();
 
-        Button delete = Buttons.action(Actions.create().label("Delete Selected").enabledBy(hasSelection)
+        Button delete = Buttons.from(Actions.create().label("Delete Selected").enabledBy(hasSelection)
                 .visibleWhen(() -> !rows.isEmpty())
                 .onClick(() -> {
                     IntegrationSpec selected = selectedState.get();
@@ -505,7 +504,7 @@ public class UITestPage extends VerticalLayout {
                                 setStatus(status, "integration-delete", "deleted selected row");
                                 refreshIntegrationDebug(debug, grid, selectedState, hasSelection);
                             });
-                }).build());
+                }).build()).build();
 
         refreshIntegrationDebug(debug, grid, selectedState, hasSelection);
         setStatus(status, "integration-ready", "select row, edit via dialog, and test delete confirmation");
