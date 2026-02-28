@@ -69,7 +69,8 @@ import java.util.stream.Collectors;
 @Route("ui-test")
 public class UITestPage extends VerticalLayout {
     // TODO: add tests to help human.(checkmark, X icon)
-    // TODO: add tabs new area: Dto tests + actions via @UiSurface
+    // TODO: add tabs, maybe even multilayer (layered by complexity.  Inputs, Buttons, Grids, Actions, ResourceActions)
+    // TODO: new area: Dto tests + actions via @UiSurface
     public UITestPage() {
         setSizeFull();
         setPadding(true);
@@ -102,7 +103,7 @@ public class UITestPage extends VerticalLayout {
                 "Covers Inputs.* and Buttons builders only.",
                 "Expected: builder DSL applies labels/placeholders/themes and button wiring without Forms.auto or Binder."
         );
-// TODO: add all
+// TODO: add all Inputs.*.build() fields.
         TextField name = Inputs.textField().label("primitive.name.label").placeholder("primitive.name.placeholder")
                 .description("primitive.name.description").tooltip("primitive.name.tooltip")
                 .widthFull().withClassName("primitive-input").build();
