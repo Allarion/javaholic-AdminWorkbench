@@ -27,9 +27,10 @@ public class HomeRoute extends VerticalLayout {
 
     @PostConstruct
     public void debug() {
-        System.out.println(Arrays.toString(ctx.getBeanNamesForType(CrudStore.class)));
+        //System.out.println(Arrays.toString(ctx.getBeanNamesForType(CrudStore.class)));
     }
 
+    // TODO: reimpl. as AppLayout
     public HomeRoute(
             UserFormDtoStore userStore,
             RoleDtoStore roleStore,
